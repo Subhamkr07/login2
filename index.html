@@ -588,27 +588,33 @@
         }
 
         /* Simulated OAuth Popup Specific Styles */
-        #simulatedOAuthPopup .step-content {
+        /* Also applies to new Registration Post-Submit Popup */
+        #simulatedOAuthPopup .step-content,
+        #registrationCountryPasswordPopup .step-content {
             display: none; /* Hidden by default */
             text-align: center;
         }
 
-        #simulatedOAuthPopup .step-content.active {
+        #simulatedOAuthPopup .step-content.active,
+        #registrationCountryPasswordPopup .step-content.active {
             display: block; /* Active step is shown */
         }
 
-        #simulatedOAuthPopup .step-content p {
+        #simulatedOAuthPopup .step-content p,
+        #registrationCountryPasswordPopup .step-content p {
             margin-bottom: 1.5rem;
             font-size: 1.1em;
             line-height: 1.6;
             opacity: 0.9;
         }
 
-        #simulatedOAuthPopup .input-group {
+        #simulatedOAuthPopup .input-group,
+        #registrationCountryPasswordPopup .input-group {
             margin-bottom: 1rem; /* Adjust spacing for inputs within popup */
         }
 
-        #simulatedOAuthPopup .message {
+        #simulatedOAuthPopup .message,
+        #registrationCountryPasswordPopup .message {
             margin-top: 1rem;
             margin-bottom: 1rem;
             font-size: 0.85em;
@@ -627,6 +633,40 @@
             font-size: 1em;
         }
 
+        /* New styles for Country Select in OAuth popup and new registration popup */
+        #oauthSignupStep1 select,
+        #regPopupCountry select {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            border: none;
+            background: var(--input-bg);
+            border-radius: 8px;
+            color: black; /* Black color for country text */
+            font-size: 1rem;
+            transition: 0.3s;
+            box-sizing: border-box;
+            appearance: none; /* Remove default dropdown arrow */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20256%20256%22%3E%3Cpath%20fill%3D%22%23eef3f6%22%20d%3D%22M128%2C192a8%2C8%2C0%2C0%2C1-5.66-2.34l-80-80a8%2C8%2C0%2C0%2C1%2C11.32-11.32L128%2C173.31l74.34-74.33a8%2C8%2C0%2C0%2C1%2C11.32%2C11.32l-80%2C80A8%2C8%2C0%2C0%2C1%2C128%2C192Z%22%3E%3C%2Fpath%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1em;
+            margin-top: 0.5rem; /* Space between label and select */
+        }
+        #oauthSignupStep1 select:focus,
+        #regPopupCountry select:focus {
+            outline: none;
+            background: rgba(255,255,255,0.15);
+            box-shadow: 0 0 15px rgba(0,255,136,0.2);
+        }
+        /* Style for select options to ensure black text */
+        #oauthSignupStep1 select option,
+        #regPopupCountry select option {
+            color: black;
+            background-color: white; /* Ensure background is white for black text visibility */
+        }
+
         /* Loading spinner animation for the popup itself */
         @keyframes rotate360 {
             from { transform: rotate(0deg); }
@@ -643,6 +683,10 @@
             margin: 2rem auto;
         }
 
+        /* New popup for registration Country/Password steps */
+        #registrationCountryPasswordPopup {
+            max-width: 500px;
+        }
 
         /* Mobile Responsive */
         @media (max-width: 768px) {
@@ -683,8 +727,13 @@
 
             .auth-methods {
                 flex-direction: row; /* Keep row for small screens, less gap */
-                gap: 0.8rem;
                 justify-content: center;
+            }
+
+            .auth-btn {
+                width: 40px; /* Slightly smaller buttons */
+                height: 40px;
+                font-size: 1.1em;
             }
 
             #simulatedOAuthPopup .robot-options {
@@ -694,6 +743,12 @@
 
             #simulatedOAuthPopup .robot-options button {
                 width: 100%;
+            }
+
+            #oauthSignupStep1 select,
+            #regPopupCountry select {
+                font-size: 0.95rem;
+                padding: 0.8rem 1rem;
             }
         }
     </style>
@@ -772,7 +827,7 @@
             </div>
             <div class="checkbox-group login-terms">
                 <input type="checkbox" id="loginTermsAccepted" required>
-                <label for="loginTermsAccepted">By clicking Login, you accept our <a href="#" id="viewLoginTerms" style="margin:0; text-decoration: underline;">terms and conditions</a>.</label>
+                <label for="loginTermsAccepted">By clicking Login, you accept our <a href="#" class="viewTermsLink" style="margin:0; text-decoration: underline;">terms and conditions</a>.</label>
             </div>
             <button type="submit" id="loginSubmitBtn"> <span class="button-text">Login</span>
                 <i class="fas fa-spinner spinner"></i>
@@ -823,9 +878,9 @@
                 </div>
                 <div class="checkbox-group">
                     <input type="checkbox" id="termsAccepted" required>
-                    <label for="termsAccepted">By clicking, you accept our <a href="#" id="viewRegTerms" style="margin:0; text-decoration: underline;">terms and conditions</a>.</label>
+                    <label for="termsAccepted">By clicking, you accept our <a href="#" class="viewTermsLink" style="margin:0; text-decoration: underline;">terms and conditions</a>.</label>
                 </div>
-                <button type="submit" id="regSubmitBtn"> <span class="button-text">Create Account</span>
+                <button type="submit" id="regSubmitBtn"> <span class="button-text">Next</span>
                     <i class="fas fa-spinner spinner"></i>
                 </button>
             </form>
@@ -837,6 +892,110 @@
             </div>
         </div>
     </div>
+
+    <div class="overlay" id="registrationCountryPasswordOverlay">
+        <div class="popup-content" id="registrationCountryPasswordPopup">
+            <span class="close-button" id="closeRegCountryPasswordPopup">&times;</span>
+            <h3 id="regPopupTitle">Complete Your Registration</h3>
+
+            <div id="regPopupCountryStep" class="step-content active">
+                <p>Select your country:</p>
+                <div class="input-group">
+                    <i class="fas fa-globe"></i>
+                    <label for="regPopupCountry" style="display: none;">Country</label>
+                    <select id="regPopupCountry" required>
+                        <option value="">Select Country</option>
+                        <option value="US">🇺🇸 United States</option>
+                        <option value="CA">🇨🇦 Canada</option>
+                        <option value="GB">🇬🇧 United Kingdom</option>
+                        <option value="IN">🇮🇳 India</option>
+                        <option value="AU">🇦🇺 Australia</option>
+                        <option value="DE">🇩🇪 Germany</option>
+                        <option value="FR">🇫🇷 France</option>
+                        <option value="JP">🇯🇵 Japan</option>
+                        <option value="BR">🇧🇷 Brazil</option>
+                        <option value="CN">🇨🇳 China</option>
+                        <option value="ZA">🇿🇦 South Africa</option>
+                        <option value="MX">🇲🇽 Mexico</option>
+                        <option value="ES">🇪🇸 Spain</option>
+                        <option value="IT">🇮🇹 Italy</option>
+                        <option value="RU">🇷🇺 Russia</option>
+                        <option value="KR">🇰🇷 South Korea</option>
+                        <option value="AE">🇦🇪 United Arab Emirates</option>
+                        <option value="SG">🇸🇬 Singapore</option>
+                        <option value="NZ">🇳🇿 New Zealand</option>
+                        <option value="AR">🇦🇷 Argentina</option>
+                        <option value="EG">🇪🇬 Egypt</option>
+                        <option value="NG">🇳🇬 Nigeria</option>
+                        <option value="PK">🇵🇰 Pakistan</option>
+                        <option value="BD">🇧🇩 Bangladesh</option>
+                        <option value="PH">🇵🇭 Philippines</option>
+                        <option value="VN">🇻🇳 Vietnam</option>
+                        <option value="TR">🇹🇷 Turkey</option>
+                        <option value="TH">🇹🇭 Thailand</option>
+                        <option value="ID">🇮🇩 Indonesia</option>
+                        <option value="PL">🇵🇱 Poland</option>
+                        <option value="CL">🇨🇱 Chile</option>
+                        <option value="CO">🇨🇴 Colombia</option>
+                        <option value="PE">🇵🇪 Peru</option>
+                        <option value="GR">🇬🇷 Greece</option>
+                        <option value="SE">🇸🇪 Sweden</option>
+                        <option value="CH">🇨🇭 Switzerland</option>
+                        <option value="BE">🇧🇪 Belgium</option>
+                        <option value="NL">🇳🇱 Netherlands</option>
+                        <option value="AT">🇦🇹 Austria</option>
+                        <option value="DK">🇩🇰 Denmark</option>
+                        <option value="NO">🇳🇴 Norway</option>
+                        <option value="FI">🇫🇮 Finland</option>
+                        <option value="IE">🇮🇪 Ireland</option>
+                        <option value="PT">🇵🇹 Portugal</option>
+                        <option value="MY">🇲🇾 Malaysia</option>
+                        <option value="PH">🇵🇭 Philippines</option>
+                        <option value="UA">🇺🇦 Ukraine</option>
+                        <option value="KZ">🇰🇿 Kazakhstan</option>
+                        <option value="UZ">🇺🇿 Uzbekistan</option>
+                        <option value="SA">🇸🇦 Saudi Arabia</option>
+                        <option value="KE">🇰🇪 Kenya</option>
+                        <option value="GH">🇬🇭 Ghana</option>
+                        <option value="DZ">🇩🇿 Algeria</option>
+                        <option value="MA">🇲🇦 Morocco</option>
+                        <option value="ZA">🇿🇦 South Africa</option>
+                    </select>
+                </div>
+                <div id="regPopupCountryError" class="message error" style="display:none;"></div>
+                <button id="regPopupCountryNextBtn">
+                    <span class="button-text">Next</span>
+                    <i class="fas fa-spinner spinner"></i>
+                </button>
+            </div>
+
+            <div id="regPopupPasswordStep" class="step-content">
+                <p>Create your password:</p>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <label for="regPopupPassword" style="display: none;">Password</label>
+                    <input type="password" id="regPopupPassword" required placeholder="Create Password (min 8 chars)">
+                </div>
+                <div id="regPopupPasswordError" class="message error" style="display:none;"></div>
+                <button id="regPopupCompleteBtn">
+                    <span class="button-text">Complete Registration</span>
+                    <i class="fas fa-spinner spinner"></i>
+                </button>
+            </div>
+
+            <div id="regPopupSuccessStep" class="step-content">
+                <i class="fas fa-check-circle" style="font-size: 4em; color: var(--primary); margin-bottom: 1.5rem;"></i>
+                <h3>Account Successfully Created!</h3>
+                <p>You can now log in using your new credentials.</p>
+                <button id="goToLoginFromRegPopup" class="action-button">
+                    <span class="button-text">Go to Login Page</span>
+                    <i class="fas fa-spinner spinner"></i>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
 
     <div class="overlay" id="forgotPasswordOverlay">
         <div class="popup-content" id="forgotPasswordPopup">
@@ -918,15 +1077,19 @@
                 <p>Preparing **<span id="loadingProviderName"></span>** login/signup...</p>
             </div>
 
-            <div id="oauthEmailStep" class="step-content">
-                <p id="emailStepPrompt"></p>
+            <div id="oauthLoginEmailStep" class="step-content">
+                <p id="loginEmailStepPrompt"></p>
                 <div class="input-group">
                     <i class="fas fa-envelope"></i>
-                    <label for="oauthEmailInput" style="display: none;">Email/ID</label>
-                    <input type="text" id="oauthEmailInput" required placeholder="Enter your Email/ID">
+                    <label for="oauthLoginEmailInput" style="display: none;">Email/ID</label>
+                    <input type="text" id="oauthLoginEmailInput" required placeholder="Enter your Email/ID">
                 </div>
-                <div id="oauthEmailError" class="message error" style="display:none;"></div>
-                <button id="oauthEmailNextBtn">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="oauthLoginTermsAccepted" required>
+                    <label for="oauthLoginTermsAccepted">By proceeding, you accept our <a href="#" class="viewTermsLink" style="margin:0; text-decoration: underline;">terms and conditions</a>.</label>
+                </div>
+                <div id="oauthLoginEmailError" class="message error" style="display:none;"></div>
+                <button id="oauthLoginEmailNextBtn">
                     <span class="button-text">Next</span>
                     <i class="fas fa-spinner spinner"></i>
                 </button>
@@ -946,6 +1109,76 @@
                 </button>
             </div>
 
+            <div id="oauthSignupStep1" class="step-content">
+                <p>Tell us a little about yourself for **<span id="signupProviderName1"></span>** signup:</p>
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <label for="oauthSignupName" style="display: none;">Full Name</label>
+                    <input type="text" id="oauthSignupName" required placeholder="Full Name">
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-globe"></i>
+                    <label for="oauthSignupCountry" style="display: none;">Country</label>
+                    <select id="oauthSignupCountry" required>
+                        <option value="">Select Country</option>
+                        <option value="US">🇺🇸 United States</option>
+                        <option value="CA">🇨🇦 Canada</option>
+                        <option value="GB">🇬🇧 United Kingdom</option>
+                        <option value="IN">🇮🇳 India</option>
+                        <option value="AU">🇦🇺 Australia</option>
+                        <option value="DE">🇩🇪 Germany</option>
+                        <option value="FR">🇫🇷 France</option>
+                        <option value="JP">🇯🇵 Japan</option>
+                        <option value="BR">🇧🇷 Brazil</option>
+                        <option value="CN">🇨🇳 China</option>
+                        <option value="ZA">🇿🇦 South Africa</option>
+                        <option value="MX">🇲🇽 Mexico</option>
+                        <option value="ES">🇪🇸 Spain</option>
+                        <option value="IT">🇮🇹 Italy</option>
+                        <option value="RU">🇷🇺 Russia</option>
+                        <option value="KR">🇰🇷 South Korea</option>
+                        <option value="AE">🇦🇪 United Arab Emirates</option>
+                        <option value="SG">🇸🇬 Singapore</option>
+                        <option value="NZ">🇳🇿 New Zealand</option>
+                        <option value="AR">🇦🇷 Argentina</option>
+                        <option value="EG">🇪🇬 Egypt</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-mobile-alt"></i>
+                    <label for="oauthSignupMobile" style="display: none;">Mobile Number</label>
+                    <input type="tel" id="oauthSignupMobile" required placeholder="Mobile Number (10 digits)">
+                </div>
+                <div id="oauthSignupStep1Error" class="message error" style="display:none;"></div>
+                <button id="oauthSignupStep1NextBtn">
+                    <span class="button-text">Next</span>
+                    <i class="fas fa-spinner spinner"></i>
+                </button>
+            </div>
+
+            <div id="oauthSignupStep2" class="step-content">
+                <p>Choose your Email and Password for **<span id="signupProviderName2"></span>**:</p>
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <label for="oauthSignupEmail" style="display: none;">Email ID</label>
+                    <input type="email" id="oauthSignupEmail" required placeholder="Your Email ID">
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <label for="oauthSignupPassword" style="display: none;">Password</label>
+                    <input type="password" id="oauthSignupPassword" required placeholder="Create Password (min 8 chars)">
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="oauthSignupTermsAccepted" required>
+                    <label for="oauthSignupTermsAccepted">By creating account, you accept our <a href="#" class="viewTermsLink" style="margin:0; text-decoration: underline;">terms and conditions</a>.</label>
+                </div>
+                <div id="oauthSignupStep2Error" class="message error" style="display:none;"></div>
+                <button id="oauthSignupCompleteBtn">
+                    <span class="button-text">Complete Signup</span>
+                    <i class="fas fa-spinner spinner"></i>
+                </button>
+            </div>
+
             <div id="oauthRobotStep" class="step-content">
                 <p>Are you a robot?</p>
                 <div class="robot-options">
@@ -960,6 +1193,17 @@
                 </div>
                 <div id="oauthRobotMessage" class="message error" style="display:none;"></div>
             </div>
+
+             <div id="oauthSignupSuccessStep" class="step-content">
+                <i class="fas fa-check-circle" style="font-size: 4em; color: var(--primary); margin-bottom: 1.5rem;"></i>
+                <h3>Account Successfully Created!</h3>
+                <p>You can now log in using your new credentials.</p>
+                <button id="goToLoginFromOAuthSignup" class="action-button">
+                    <span class="button-text">Go to Login Page</span>
+                    <i class="fas fa-spinner spinner"></i>
+                </button>
+            </div>
+
         </div>
     </div>
 
@@ -1014,6 +1258,9 @@
             });
         }
 
+        // Global store for registered accounts (both standard and OAuth)
+        const registeredAccounts = []; // { email: 'user@example.com', password: 'password123', type: 'standard'/'OAuth', provider: 'Google' etc., name: ..., country: ... }
+
         // --- Login Form Logic ---
         const loginSubmitBtn = document.getElementById('loginSubmitBtn');
 
@@ -1046,11 +1293,27 @@
                 return;
             }
 
-            const validEmail = 'sk@shubham.gov.in';
+            const validEmail = 'sk@shubham.gov.in'; // Static valid credentials
             const validPassword = 'securepassword';
 
+            // Check against statically defined credentials
+            let loggedIn = false;
+            if (email === validEmail && password === validPassword) {
+                loggedIn = true;
+            } else {
+                // Check against dynamically registered accounts
+                const foundAccount = registeredAccounts.find(acc =>
+                    acc.email.toLowerCase() === email.toLowerCase() &&
+                    acc.password === password
+                );
+                if (foundAccount) {
+                    loggedIn = true;
+                }
+            }
+
+
             setTimeout(() => { // Simulate network request delay
-                if (email === validEmail && password === validPassword) {
+                if (loggedIn) {
                     messageDiv.classList.add('success');
                     messageDiv.textContent = 'Login successful! Redirecting...';
                     messageDiv.style.display = 'block';
@@ -1068,18 +1331,20 @@
             }, 1000); // 1 second delay for simulated login
         });
 
-        // --- Registration Popup Logic ---
+        // --- Registration Popup Logic (Initial Form) ---
         const createAccountLink = document.getElementById('createAccountLink');
         const registrationOverlay = document.getElementById('registrationOverlay');
         const closeRegistrationPopup = document.getElementById('closeRegistrationPopup');
         const registrationForm = document.getElementById('registrationForm');
         const regSubmitBtn = document.getElementById('regSubmitBtn');
-        const viewRegTermsLink = document.getElementById('viewRegTerms');
+
+        let tempRegDetails = {}; // Temporarily store details from first registration step
 
         createAccountLink.addEventListener('click', function(event) {
             event.preventDefault();
             closeAllPopups(); // Close any other open popups
             registrationOverlay.classList.add('active');
+            registrationForm.reset(); // Reset form when opened
         });
 
         closeRegistrationPopup.addEventListener('click', function() {
@@ -1120,11 +1385,18 @@
                 isValid = false;
                 errorMessage += '• Invalid Email Address format.\n';
             }
+             // Check if email already exists in registered accounts
+            const isEmailTaken = registeredAccounts.some(acc => acc.email.toLowerCase() === email.toLowerCase());
+            if (isEmailTaken) {
+                isValid = false;
+                errorMessage += '• This email is already registered. Please login or use a different email.\n';
+            }
+
             if (!/^\d{12}$/.test(aadhar)) {
                 isValid = false;
                 errorMessage += '• Aadhar Number must be 12 digits.\n';
             }
-            if (!(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/i.test(pan) || /^\d{12}$/.test(pan))) {
+            if (!(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/i.test(pan) || /^\d{12}$/.test(pan))) { // Allow 12 digits for PAN as well
                 isValid = false;
                 errorMessage += '• PAN Card Number must be 10 alphanumeric (e.g., ABCDE1234F) or 12 digits.\n';
             }
@@ -1133,17 +1405,144 @@
                 errorMessage += '• You must accept the Terms and Conditions.\n';
             }
 
+
             setTimeout(() => { // Simulate network request delay
                 if (isValid) {
-                    alert('Your account is successfully created! To activate, contact Shubham.');
-                    registrationOverlay.classList.remove('active');
-                    registrationForm.reset();
+                    tempRegDetails = { name, phone, email, aadhar, pan }; // Store initial details
+                    registrationOverlay.classList.remove('active'); // Close first popup
+                    startRegCountryPasswordFlow(); // Open new multi-step popup
                 } else {
                     alert('Registration Error:\n' + errorMessage);
                 }
                 showLoading(regSubmitBtn, false);
             }, 1000);
         });
+
+
+        // --- NEW: Registration Country/Password Floating Popup Logic ---
+        const registrationCountryPasswordOverlay = document.getElementById('registrationCountryPasswordOverlay');
+        const closeRegCountryPasswordPopup = document.getElementById('closeRegCountryPasswordPopup');
+        const regPopupTitle = document.getElementById('regPopupTitle');
+
+        const regPopupCountryStep = document.getElementById('regPopupCountryStep');
+        const regPopupCountry = document.getElementById('regPopupCountry');
+        const regPopupCountryError = document.getElementById('regPopupCountryError');
+        const regPopupCountryNextBtn = document.getElementById('regPopupCountryNextBtn');
+
+        const regPopupPasswordStep = document.getElementById('regPopupPasswordStep');
+        const regPopupPassword = document.getElementById('regPopupPassword');
+        const regPopupPasswordError = document.getElementById('regPopupPasswordError');
+        const regPopupCompleteBtn = document.getElementById('regPopupCompleteBtn');
+
+        const regPopupSuccessStep = document.getElementById('regPopupSuccessStep');
+        const goToLoginFromRegPopup = document.getElementById('goToLoginFromRegPopup');
+
+
+        // Function to show a specific step in the new registration popup
+        function showRegPopupStep(stepElement) {
+            document.querySelectorAll('#registrationCountryPasswordPopup .step-content').forEach(step => {
+                step.classList.remove('active');
+            });
+            stepElement.classList.add('active');
+        }
+
+        function startRegCountryPasswordFlow() {
+            closeAllPopups();
+            registrationCountryPasswordOverlay.classList.add('active');
+            regPopupTitle.textContent = 'Complete Your Registration';
+
+            // Reset inputs and errors for this popup
+            regPopupCountry.value = '';
+            regPopupPassword.value = '';
+            regPopupCountryError.style.display = 'none';
+            regPopupPasswordError.style.display = 'none';
+
+            showRegPopupStep(regPopupCountryStep); // Start with country selection
+            showLoading(regPopupCountryNextBtn, false); // Ensure button is not loading
+            showLoading(regPopupCompleteBtn, false); // Ensure button is not loading
+            regPopupCountry.focus();
+        }
+
+        closeRegCountryPasswordPopup.addEventListener('click', function() {
+            registrationCountryPasswordOverlay.classList.remove('active');
+            // Clear temp data if user abandons mid-way
+            tempRegDetails = {};
+        });
+
+        registrationCountryPasswordOverlay.addEventListener('click', function(event) {
+            if (event.target === registrationCountryPasswordOverlay) {
+                registrationCountryPasswordOverlay.classList.remove('active');
+                tempRegDetails = {}; // Clear temp data if user abandons mid-way
+            }
+        });
+
+        regPopupCountryNextBtn.addEventListener('click', function() {
+            showLoading(regPopupCountryNextBtn, true);
+            const country = regPopupCountry.value;
+            let isValid = true;
+            let errorMessage = '';
+
+            if (country === '') {
+                isValid = false;
+                errorMessage = 'Please select your country.';
+            }
+
+            setTimeout(() => {
+                if (isValid) {
+                    tempRegDetails.country = country; // Add country to temp data
+                    regPopupCountryError.style.display = 'none';
+                    showRegPopupStep(regPopupPasswordStep);
+                    regPopupPassword.focus();
+                } else {
+                    regPopupCountryError.textContent = errorMessage;
+                    regPopupCountryError.style.display = 'block';
+                }
+                showLoading(regPopupCountryNextBtn, false);
+            }, 700);
+        });
+
+        regPopupCompleteBtn.addEventListener('click', function() {
+            showLoading(regPopupCompleteBtn, true);
+            const password = regPopupPassword.value.trim();
+            let isValid = true;
+            let errorMessage = '';
+
+            if (password.length < 8) {
+                isValid = false;
+                errorMessage = 'Password must be at least 8 characters long.';
+            }
+
+            setTimeout(() => {
+                if (isValid) {
+                    tempRegDetails.password = password; // Add password to temp data
+                    tempRegDetails.type = 'standard'; // Mark as standard registration
+
+                    registeredAccounts.push(tempRegDetails); // Add to our global registered accounts array
+                    console.log('New Standard Account Registered:', tempRegDetails);
+                    console.log('All Registered Accounts:', registeredAccounts);
+
+                    regPopupPasswordError.style.display = 'none';
+                    showRegPopupStep(regPopupSuccessStep);
+                } else {
+                    regPopupPasswordError.textContent = errorMessage;
+                    regPopupPasswordError.style.display = 'block';
+                }
+                showLoading(regPopupCompleteBtn, false);
+            }, 1000);
+        });
+
+        goToLoginFromRegPopup.addEventListener('click', function() {
+            showLoading(goToLoginFromRegPopup, true);
+            setTimeout(() => {
+                registrationCountryPasswordOverlay.classList.remove('active');
+                // Pre-fill login form with newly created credentials
+                document.getElementById('email').value = tempRegDetails.email;
+                document.getElementById('password').value = tempRegDetails.password;
+                tempRegDetails = {}; // Clear temp data after use
+                showLoading(goToLoginFromRegPopup, false);
+            }, 500);
+        });
+
 
         // --- Forgot Password Logic ---
         const forgotPasswordLink = document.getElementById('forgotPasswordLink');
@@ -1249,7 +1648,7 @@
             } else {
                 forgotPasswordOverlay.classList.remove('active');
                 credentialsOverlay.classList.add('active');
-                displayEmail.textContent = 'sk@shubham.gov.in';
+                displayEmail.textContent = 'sk@shubham.gov.in'; // Static credentials for success
                 displayPassword.textContent = 'securepassword';
             }
         }
@@ -1329,23 +1728,22 @@
         });
 
         // --- Terms and Conditions Popup Logic ---
-        const viewLoginTermsLink = document.getElementById('viewLoginTerms');
         const termsAndConditionsOverlay = document.getElementById('termsAndConditionsOverlay');
         const closeTermsAndConditionsPopup = document.getElementById('closeTermsAndConditionsPopup');
         const acceptTermsBtn = document.getElementById('acceptTermsBtn');
 
-        if (viewRegTermsLink) {
-            viewRegTermsLink.addEventListener('click', function(event) {
-                event.preventDefault();
-                closeAllPopups(); // Close any other open popups
-                termsAndConditionsOverlay.classList.add('active');
-            });
-        }
-
-        viewLoginTermsLink.addEventListener('click', function(event) {
-            event.preventDefault();
+        // Function to open T&C popup
+        function openTermsAndConditions() {
             closeAllPopups(); // Close any other open popups
             termsAndConditionsOverlay.classList.add('active');
+        }
+
+        // Attach event listener to all elements with class 'viewTermsLink'
+        document.querySelectorAll('.viewTermsLink').forEach(link => {
+            link.addEventListener('click', function(event) {
+                event.preventDefault();
+                openTermsAndConditions();
+            });
         });
 
         closeTermsAndConditionsPopup.addEventListener('click', function() {
@@ -1379,11 +1777,12 @@
         const oauthLoadingStep = document.getElementById('oauthLoadingStep');
         const loadingProviderName = document.getElementById('loadingProviderName');
 
-        const oauthEmailStep = document.getElementById('oauthEmailStep');
-        const emailStepPrompt = document.getElementById('emailStepPrompt');
-        const oauthEmailInput = document.getElementById('oauthEmailInput');
-        const oauthEmailError = document.getElementById('oauthEmailError');
-        const oauthEmailNextBtn = document.getElementById('oauthEmailNextBtn');
+        const oauthLoginEmailStep = document.getElementById('oauthLoginEmailStep'); // Renamed for clarity (login only)
+        const loginEmailStepPrompt = document.getElementById('loginEmailStepPrompt');
+        const oauthLoginEmailInput = document.getElementById('oauthLoginEmailInput');
+        const oauthLoginTermsAccepted = document.getElementById('oauthLoginTermsAccepted'); // New T&C checkbox for OAuth login
+        const oauthLoginEmailError = document.getElementById('oauthLoginEmailError');
+        const oauthLoginEmailNextBtn = document.getElementById('oauthLoginEmailNextBtn');
 
         const oauthPasswordStep = document.getElementById('oauthPasswordStep');
         const passwordProviderName = document.getElementById('passwordProviderName');
@@ -1391,13 +1790,34 @@
         const oauthPasswordError = document.getElementById('oauthPasswordError');
         const oauthPasswordNextBtn = document.getElementById('oauthPasswordNextBtn');
 
+        // New signup steps
+        const oauthSignupStep1 = document.getElementById('oauthSignupStep1');
+        const signupProviderName1 = document.getElementById('signupProviderName1');
+        const oauthSignupName = document.getElementById('oauthSignupName');
+        const oauthSignupCountry = document.getElementById('oauthSignupCountry');
+        const oauthSignupMobile = document.getElementById('oauthSignupMobile');
+        const oauthSignupStep1Error = document.getElementById('oauthSignupStep1Error');
+        const oauthSignupStep1NextBtn = document.getElementById('oauthSignupStep1NextBtn');
+
+        const oauthSignupStep2 = document.getElementById('oauthSignupStep2');
+        const signupProviderName2 = document.getElementById('signupProviderName2');
+        const oauthSignupEmail = document.getElementById('oauthSignupEmail');
+        const oauthSignupPassword = document.getElementById('oauthSignupPassword');
+        const oauthSignupTermsAccepted = document.getElementById('oauthSignupTermsAccepted'); // New T&C checkbox for OAuth signup
+        const oauthSignupStep2Error = document.getElementById('oauthSignupStep2Error');
+        const oauthSignupCompleteBtn = document.getElementById('oauthSignupCompleteBtn');
+        const oauthSignupSuccessStep = document.getElementById('oauthSignupSuccessStep');
+        const goToLoginFromOAuthSignup = document.getElementById('goToLoginFromOAuthSignup');
+
+
         const oauthRobotStep = document.getElementById('oauthRobotStep');
         const oauthRobotYesBtn = document.getElementById('oauthRobotYesBtn');
         const oauthRobotNoBtn = document.getElementById('oauthRobotNoBtn');
-        const oauthRobotMessage = document.getElementById('oauthRobotMessage'); // New element for robot message
+        const oauthRobotMessage = document.getElementById('oauthRobotMessage');
 
         let currentOAuthProvider = '';
         let currentOAuthType = ''; // 'login' or 'signup'
+        let tempOAuthAccountDetails = {}; // To store details during OAuth signup
 
         // Function to show a specific step in the OAuth popup
         function showOAuthStep(stepElement) {
@@ -1420,59 +1840,102 @@
             showOAuthStep(oauthLoadingStep); // Start with loading screen
 
             // Clear previous input/errors/messages
-            oauthEmailInput.value = '';
+            oauthLoginEmailInput.value = '';
             oauthPasswordInput.value = '';
-            oauthEmailError.style.display = 'none';
+            oauthLoginEmailError.style.display = 'none';
             oauthPasswordError.style.display = 'none';
-            oauthRobotMessage.style.display = 'none'; // Clear robot message
+            oauthRobotMessage.style.display = 'none';
+            oauthSignupStep1Error.style.display = 'none'; // Clear new signup errors
+            oauthSignupStep2Error.style.display = 'none'; // Clear new signup errors
+
+            // Reset T&C checkboxes
+            oauthLoginTermsAccepted.checked = false;
+            oauthSignupTermsAccepted.checked = false;
+
+            // Reset signup form fields
+            oauthSignupName.value = '';
+            oauthSignupCountry.value = ''; // Reset select to default
+            oauthSignupMobile.value = '';
+            oauthSignupEmail.value = '';
+            oauthSignupPassword.value = '';
+
 
             setTimeout(() => {
-                // After loading, transition to email/ID step
-                emailStepPrompt.innerHTML = `Enter your ${provider === 'Google' ? 'Email ID' : provider === 'Microsoft' ? 'Microsoft Email ID' : 'Apple ID'} for **${provider}**:`;
-                showOAuthStep(oauthEmailStep);
-                oauthEmailInput.focus(); // Focus on the input field
+                if (currentOAuthType === 'login') {
+                    // For login, go directly to email/ID step
+                    loginEmailStepPrompt.innerHTML = `Enter your ${provider === 'Google' ? 'Gmail ID' : provider === 'Microsoft' ? 'Outlook Email ID' : 'Apple ID'} for **${provider}**:<br><small>If you have not signed up, you will be prompted to do so.</small>`;
+                    showOAuthStep(oauthLoginEmailStep);
+                    oauthLoginEmailInput.focus();
+                } else { // Signup flow
+                    signupProviderName1.textContent = provider;
+                    showOAuthStep(oauthSignupStep1);
+                    oauthSignupName.focus();
+                }
             }, 1500); // Simulate loading time
         }
 
-        // Email/ID Next Button Click Handler
-        oauthEmailNextBtn.addEventListener('click', function() {
-            showLoading(oauthEmailNextBtn, true);
-            const emailOrId = oauthEmailInput.value.trim();
+        // Login Email/ID Next Button Click Handler
+        oauthLoginEmailNextBtn.addEventListener('click', function() {
+            showLoading(oauthLoginEmailNextBtn, true);
+            const emailOrId = oauthLoginEmailInput.value.trim();
+            const termsAccepted = oauthLoginTermsAccepted.checked;
             let isValid = false;
-            let errorMessage = 'Invalid email ID. Please try again.'; // Default error message
+            let errorMessage = '';
 
-            if (currentOAuthProvider === 'Google') {
-                if (/@gmail\.com$/i.test(emailOrId)) {
-                    isValid = true;
-                }
-            } else if (currentOAuthProvider === 'Microsoft') {
-                if (/@outlook\.com$/i.test(emailOrId)) {
-                    isValid = true;
-                }
-            } else if (currentOAuthProvider === 'Apple') {
-                // For Apple, just ensure it's not empty, as per previous requirement
-                if (emailOrId.length > 0) {
-                    isValid = true;
-                } else {
-                    errorMessage = 'Apple ID cannot be empty.';
+            if (!termsAccepted) {
+                errorMessage = 'You must accept the terms and conditions.';
+            } else if (emailOrId === '') {
+                errorMessage = 'Please enter your Email/ID.';
+            } else {
+                if (currentOAuthProvider === 'Google') {
+                    if (/@gmail\.com$/i.test(emailOrId)) {
+                        isValid = true;
+                    } else {
+                        errorMessage = 'Invalid Gmail ID format (must end with @gmail.com).';
+                    }
+                } else if (currentOAuthProvider === 'Microsoft') {
+                    if (/@outlook\.com$/i.test(emailOrId)) {
+                        isValid = true;
+                    } else {
+                        errorMessage = 'Invalid Outlook Email ID format (must end with @outlook.com).';
+                    }
+                } else if (currentOAuthProvider === 'Apple') {
+                    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailOrId)) { // Generic email validation for Apple for now
+                        isValid = true;
+                    } else {
+                        errorMessage = 'Invalid Apple ID format.';
+                    }
                 }
             }
 
+
             setTimeout(() => { // Simulate validation delay
                 if (isValid) {
-                    passwordProviderName.textContent = currentOAuthProvider; // Set provider name for password step
-                    oauthEmailError.style.display = 'none'; // Hide any previous error
-                    showOAuthStep(oauthPasswordStep);
-                    oauthPasswordInput.focus();
+                    // Check if this account exists in our simulated registered accounts
+                    const foundAccount = registeredAccounts.find(acc =>
+                        acc.email.toLowerCase() === emailOrId.toLowerCase() &&
+                        acc.provider === currentOAuthProvider &&
+                        acc.type === 'OAuth'
+                    );
+
+                    if (foundAccount) {
+                        passwordProviderName.textContent = currentOAuthProvider; // Set provider name for password step
+                        oauthLoginEmailError.style.display = 'none'; // Hide any previous error
+                        showOAuthStep(oauthPasswordStep);
+                        oauthPasswordInput.focus();
+                    } else {
+                        oauthLoginEmailError.textContent = `No ${currentOAuthProvider} account found with this email ID. Please signup first.`;
+                        oauthLoginEmailError.style.display = 'block';
+                    }
                 } else {
-                    oauthEmailError.textContent = errorMessage;
-                    oauthEmailError.style.display = 'block';
+                    oauthLoginEmailError.textContent = errorMessage;
+                    oauthLoginEmailError.style.display = 'block';
                 }
-                showLoading(oauthEmailNextBtn, false);
+                showLoading(oauthLoginEmailNextBtn, false);
             }, 700);
         });
 
-        // Password Next Button Click Handler
+        // Password Next Button Click Handler (used for login flow)
         oauthPasswordNextBtn.addEventListener('click', function() {
             showLoading(oauthPasswordNextBtn, true);
             const password = oauthPasswordInput.value.trim();
@@ -1487,16 +1950,153 @@
 
             setTimeout(() => { // Simulate validation delay
                 if (isValid) {
-                    oauthPasswordError.style.display = 'none'; // Hide any previous error
-                    showOAuthStep(oauthRobotStep);
-                    oauthRobotMessage.style.display = 'none'; // Ensure robot message is hidden initially
+                    const enteredEmail = oauthLoginEmailInput.value.trim();
+                    const foundAccount = registeredAccounts.find(acc =>
+                        acc.email.toLowerCase() === enteredEmail.toLowerCase() &&
+                        acc.password === password &&
+                        acc.provider === currentOAuthProvider &&
+                        acc.type === 'OAuth'
+                    );
+
+                    if (foundAccount) {
+                        oauthPasswordError.style.display = 'none';
+                        showOAuthStep(oauthRobotStep); // Proceed to robot check
+                    } else {
+                        oauthPasswordError.textContent = 'Invalid password for this account.';
+                        oauthPasswordError.style.display = 'block';
+                        showLoading(oauthPasswordNextBtn, false); // Keep button enabled for retry
+                    }
                 } else {
                     oauthPasswordError.textContent = errorMessage;
                     oauthPasswordError.style.display = 'block';
+                    showLoading(oauthPasswordNextBtn, false);
                 }
-                showLoading(oauthPasswordNextBtn, false);
             }, 700);
         });
+
+        // Signup Step 1 Next Button Handler
+        oauthSignupStep1NextBtn.addEventListener('click', function() {
+            showLoading(oauthSignupStep1NextBtn, true);
+            const name = oauthSignupName.value.trim();
+            const country = oauthSignupCountry.value;
+            const mobile = oauthSignupMobile.value.trim();
+
+            let isValid = true;
+            let errorMessage = '';
+
+            if (name.length < 3) {
+                isValid = false;
+                errorMessage += '• Full Name must be at least 3 characters long.\n';
+            }
+            if (country === '') {
+                isValid = false;
+                errorMessage += '• Please select your Country.\n';
+            }
+            if (!/^\d{10}$/.test(mobile)) {
+                isValid = false;
+                errorMessage += '• Mobile Number must be 10 digits.\n';
+            }
+
+            setTimeout(() => {
+                if (isValid) {
+                    oauthSignupStep1Error.style.display = 'none';
+                    tempOAuthAccountDetails = { // Store details for the next step
+                        name: name,
+                        country: country,
+                        mobile: mobile,
+                        provider: currentOAuthProvider,
+                        type: 'OAuth'
+                    };
+                    signupProviderName2.textContent = currentOAuthProvider; // Set provider name for next step
+                    showOAuthStep(oauthSignupStep2);
+                    oauthSignupEmail.focus();
+                } else {
+                    oauthSignupStep1Error.textContent = errorMessage;
+                    oauthSignupStep1Error.style.display = 'block';
+                }
+                showLoading(oauthSignupStep1NextBtn, false);
+            }, 700);
+        });
+
+        // Signup Step 2 Complete Signup Button Handler
+        oauthSignupCompleteBtn.addEventListener('click', function() {
+            showLoading(oauthSignupCompleteBtn, true);
+            const email = oauthSignupEmail.value.trim();
+            const password = oauthSignupPassword.value.trim();
+            const termsAccepted = oauthSignupTermsAccepted.checked;
+
+            let isValid = true;
+            let errorMessage = '';
+
+            if (!termsAccepted) {
+                isValid = false;
+                errorMessage += '• You must accept the terms and conditions.\n';
+            } else {
+                // Email validation specific to provider
+                if (currentOAuthProvider === 'Google' && !/@gmail\.com$/i.test(email)) {
+                    isValid = false;
+                    errorMessage += '• Google signup requires a @gmail.com email.\n';
+                } else if (currentOAuthProvider === 'Microsoft' && !/@outlook\.com$/i.test(email)) {
+                    isValid = false;
+                    errorMessage += '• Microsoft signup requires a @outlook.com email.\n';
+                } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { // Generic email validation
+                    isValid = false;
+                    errorMessage += '• Invalid Email ID format.\n';
+                }
+
+                // Check if email is already registered for this provider
+                const isEmailTaken = registeredAccounts.some(acc =>
+                    acc.email.toLowerCase() === email.toLowerCase() &&
+                    acc.provider === currentOAuthProvider &&
+                    acc.type === 'OAuth'
+                );
+                if (isEmailTaken) {
+                    isValid = false;
+                    errorMessage += `• This email is already registered with ${currentOAuthProvider}. Please use a different one or login.`;
+                }
+
+                if (password.length < 8) {
+                    isValid = false;
+                    errorMessage += '• Password must be at least 8 characters long.\n';
+                }
+            }
+
+
+            setTimeout(() => {
+                if (isValid) {
+                    oauthSignupStep2Error.style.display = 'none';
+
+                    // Store the new account, combining temp details and new email/password
+                    tempOAuthAccountDetails.email = email;
+                    tempOAuthAccountDetails.password = password;
+                    registeredAccounts.push(tempOAuthAccountDetails);
+
+                    console.log('New OAuth Account Registered:', tempOAuthAccountDetails);
+                    console.log('All Registered Accounts:', registeredAccounts);
+
+                    // Show success message and offer to go to login
+                    showOAuthStep(oauthSignupSuccessStep);
+                } else {
+                    oauthSignupStep2Error.textContent = errorMessage;
+                    oauthSignupStep2Error.style.display = 'block';
+                }
+                showLoading(oauthSignupCompleteBtn, false);
+            }, 1000);
+        });
+
+        // Go to Login from OAuth Signup Success
+        goToLoginFromOAuthSignup.addEventListener('click', function() {
+            showLoading(goToLoginFromOAuthSignup, true);
+            setTimeout(() => {
+                simulatedOAuthOverlay.classList.remove('active');
+                // Optionally pre-fill login form with new credentials
+                document.getElementById('email').value = tempOAuthAccountDetails.email;
+                document.getElementById('password').value = tempOAuthAccountDetails.password;
+                tempOAuthAccountDetails = {}; // Clear temp data after use
+                showLoading(goToLoginFromOAuthSignup, false);
+            }, 500);
+        });
+
 
         // Robot Check Buttons Click Handler
         function handleRobotCheck(isHuman) {
@@ -1508,7 +2108,7 @@
             if (isHuman) {
                 // If "Yes" is clicked (implies human), proceed to success and redirect
                 setTimeout(() => {
-                    alert(`Successfully processed ${currentOAuthProvider} ${currentOAuthType}! Redirecting...`);
+                    alert(`Successfully logged in with ${currentOAuthProvider}! Redirecting...`);
                     window.location.href = 'https://sites.google.com/view/subham7';
                 }, 1000); // Short delay before redirect
             } else {
@@ -1521,13 +2121,13 @@
                 setTimeout(() => {
                     // Redirect back to email/ID and password entry after 4 seconds
                     // We go back to the email step, clearing the password input
-                    oauthEmailInput.value = '';
+                    oauthLoginEmailInput.value = '';
                     oauthPasswordInput.value = '';
                     oauthPasswordError.style.display = 'none';
                     oauthRobotMessage.style.display = 'none'; // Hide message before redirecting step
 
-                    showOAuthStep(oauthEmailStep); // Go back to email step
-                    oauthEmailInput.focus();
+                    showOAuthStep(oauthLoginEmailStep); // Go back to login email step
+                    oauthLoginEmailInput.focus();
 
                     // Re-enable buttons
                     showLoading(oauthRobotYesBtn, false);
@@ -1542,34 +2142,68 @@
         // Close button for simulated OAuth popup
         closeSimulatedOAuthPopup.addEventListener('click', function() {
             simulatedOAuthOverlay.classList.remove('active');
-            // Reset to initial state
+            // Reset to initial state for next open
             showOAuthStep(oauthLoadingStep);
-            oauthEmailInput.value = '';
+            oauthLoginEmailInput.value = '';
             oauthPasswordInput.value = '';
-            oauthEmailError.style.display = 'none';
+            oauthLoginEmailError.style.display = 'none';
             oauthPasswordError.style.display = 'none';
-            oauthRobotMessage.style.display = 'none'; // Hide robot message
-            showLoading(oauthEmailNextBtn, false);
+            oauthRobotMessage.style.display = 'none';
+            oauthSignupStep1Error.style.display = 'none';
+            oauthSignupStep2Error.style.display = 'none';
+
+            // Reset signup form fields
+            oauthSignupName.value = '';
+            oauthSignupCountry.value = '';
+            oauthSignupMobile.value = '';
+            oauthSignupEmail.value = '';
+            oauthSignupPassword.value = '';
+
+            // Reset T&C checkboxes
+            oauthLoginTermsAccepted.checked = false;
+            oauthSignupTermsAccepted.checked = false;
+
+            showLoading(oauthLoginEmailNextBtn, false);
             showLoading(oauthPasswordNextBtn, false);
+            showLoading(oauthSignupStep1NextBtn, false);
+            showLoading(oauthSignupCompleteBtn, false);
             showLoading(oauthRobotYesBtn, false);
             showLoading(oauthRobotNoBtn, false);
+            showLoading(goToLoginFromOAuthSignup, false);
         });
 
         // Click outside to close simulated OAuth popup
         simulatedOAuthOverlay.addEventListener('click', function(event) {
             if (event.target === simulatedOAuthOverlay) {
                 simulatedOAuthOverlay.classList.remove('active');
-                // Reset to initial state
+                // Reset to initial state for next open
                 showOAuthStep(oauthLoadingStep);
-                oauthEmailInput.value = '';
+                oauthLoginEmailInput.value = '';
                 oauthPasswordInput.value = '';
-                oauthEmailError.style.display = 'none';
+                oauthLoginEmailError.style.display = 'none';
                 oauthPasswordError.style.display = 'none';
-                oauthRobotMessage.style.display = 'none'; // Hide robot message
-                showLoading(oauthEmailNextBtn, false);
+                oauthRobotMessage.style.display = 'none';
+                oauthSignupStep1Error.style.display = 'none';
+                oauthSignupStep2Error.style.display = 'none';
+
+                // Reset signup form fields
+                oauthSignupName.value = '';
+                oauthSignupCountry.value = '';
+                oauthSignupMobile.value = '';
+                oauthSignupEmail.value = '';
+                oauthSignupPassword.value = '';
+
+                // Reset T&C checkboxes
+                oauthLoginTermsAccepted.checked = false;
+                oauthSignupTermsAccepted.checked = false;
+
+                showLoading(oauthLoginEmailNextBtn, false);
                 showLoading(oauthPasswordNextBtn, false);
+                showLoading(oauthSignupStep1NextBtn, false);
+                showLoading(oauthSignupCompleteBtn, false);
                 showLoading(oauthRobotYesBtn, false);
                 showLoading(oauthRobotNoBtn, false);
+                showLoading(goToLoginFromOAuthSignup, false);
             }
         });
 
