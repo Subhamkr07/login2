@@ -437,6 +437,12 @@
             transform: translate(-50%, -50%);
         }
 
+        /* Removed disabled style as it's not needed now for the main checkbox functionality */
+        /* .checkbox-group input[type="checkbox"]:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        } */
+
 
         .checkbox-group label a {
             color: var(--primary); /* New link color */
@@ -827,9 +833,10 @@
             </div>
             <div class="checkbox-group login-terms">
                 <input type="checkbox" id="loginTermsAccepted" required>
-                <label for="loginTermsAccepted">By clicking Login, you accept our <a href="#" class="viewTermsLink" style="margin:0; text-decoration: underline;">terms and conditions</a>.</label>
+                <label for="loginTermsAccepted">By clicking Login, you accept our <a href="#" class="viewTermsLink" data-target-checkbox="loginTermsAccepted" style="margin:0; text-decoration: underline;">terms and conditions</a>.</label>
             </div>
-            <button type="submit" id="loginSubmitBtn"> <span class="button-text">Login</span>
+            <button type="submit" id="loginSubmitBtn">
+                <span class="button-text">Login</span>
                 <i class="fas fa-spinner spinner"></i>
             </button>
             <div id="loginMessage" class="message"></div>
@@ -878,9 +885,10 @@
                 </div>
                 <div class="checkbox-group">
                     <input type="checkbox" id="termsAccepted" required>
-                    <label for="termsAccepted">By clicking, you accept our <a href="#" class="viewTermsLink" style="margin:0; text-decoration: underline;">terms and conditions</a>.</label>
+                    <label for="termsAccepted">By clicking, you accept our <a href="#" class="viewTermsLink" data-target-checkbox="termsAccepted" style="margin:0; text-decoration: underline;">terms and conditions</a>.</label>
                 </div>
-                <button type="submit" id="regSubmitBtn"> <span class="button-text">Next</span>
+                <button type="submit" id="regSubmitBtn">
+                    <span class="button-text">Next</span>
                     <i class="fas fa-spinner spinner"></i>
                 </button>
             </form>
@@ -1060,7 +1068,7 @@
                 <p>By continuing to use this website and clicking "Login", you acknowledge and agree to abide by these terms. It is your responsibility to review these terms periodically for any updates or changes. If you do not agree to these terms, please do not proceed with the login process.</p>
                 <p>For more details, please contact Shubham directly.</p>
             </div>
-            <button id="acceptTermsBtn">
+            <button id="acceptTermsBtn" data-checkbox-id="">
                 <span class="button-text">Understood</span>
                 <i class="fas fa-spinner spinner"></i>
             </button>
@@ -1086,7 +1094,7 @@
                 </div>
                 <div class="checkbox-group">
                     <input type="checkbox" id="oauthLoginTermsAccepted" required>
-                    <label for="oauthLoginTermsAccepted">By proceeding, you accept our <a href="#" class="viewTermsLink" style="margin:0; text-decoration: underline;">terms and conditions</a>.</label>
+                    <label for="oauthLoginTermsAccepted">By proceeding, you accept our <a href="#" class="viewTermsLink" data-target-checkbox="oauthLoginTermsAccepted" style="margin:0; text-decoration: underline;">terms and conditions</a>.</label>
                 </div>
                 <div id="oauthLoginEmailError" class="message error" style="display:none;"></div>
                 <button id="oauthLoginEmailNextBtn">
@@ -1170,7 +1178,7 @@
                 </div>
                 <div class="checkbox-group">
                     <input type="checkbox" id="oauthSignupTermsAccepted" required>
-                    <label for="oauthSignupTermsAccepted">By creating account, you accept our <a href="#" class="viewTermsLink" style="margin:0; text-decoration: underline;">terms and conditions</a>.</label>
+                    <label for="oauthSignupTermsAccepted">By creating account, you accept our <a href="#" class="viewTermsLink" data-target-checkbox="oauthSignupTermsAccepted" style="margin:0; text-decoration: underline;">terms and conditions</a>.</label>
                 </div>
                 <div id="oauthSignupStep2Error" class="message error" style="display:none;"></div>
                 <button id="oauthSignupCompleteBtn">
@@ -1259,18 +1267,28 @@
         }
 
         // Global store for registered accounts (both standard and OAuth)
-        const registeredAccounts = []; // { email: 'user@example.com', password: 'password123', type: 'standard'/'OAuth', provider: 'Google' etc., name: ..., country: ... }
+        // Each account will now have a 'type' ('standard' or 'oauth') and 'provider' (for oauth accounts)
+        const registeredAccounts = [
+            // Static example for a standard account
+            { email: 'sk@shubham.gov.in', password: 'securepassword', type: 'standard' },
+            // Static example for an OAuth Google account
+            { email: 'user@gmail.com', password: 'oauthpasswordgoogle', type: 'oauth', provider: 'Google' },
+            // Static example for an OAuth Apple account
+            { email: 'user@icloud.com', password: 'oauthpasswordapple', type: 'oauth', provider: 'Apple' }
+            // Static example for an OAuth Microsoft account
+            ,{ email: 'user@outlook.com', password: 'oauthpasswordmicrosoft', type: 'oauth', provider: 'Microsoft' }
+        ];
 
         // --- Login Form Logic ---
         const loginSubmitBtn = document.getElementById('loginSubmitBtn');
+        const loginTermsAccepted = document.getElementById('loginTermsAccepted');
 
         document.getElementById('loginForm').addEventListener('submit', function(event) {
             event.preventDefault();
             showLoading(loginSubmitBtn, true);
 
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const loginTermsAccepted = document.getElementById('loginTermsAccepted').checked;
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
             const messageDiv = document.getElementById('loginMessage');
 
             messageDiv.textContent = '';
@@ -1285,7 +1303,7 @@
                 return;
             }
 
-            if (!loginTermsAccepted) {
+            if (!loginTermsAccepted.checked) {
                 messageDiv.classList.add('error');
                 messageDiv.textContent = 'You must accept the terms and conditions to log in.';
                 messageDiv.style.display = 'block';
@@ -1293,42 +1311,37 @@
                 return;
             }
 
-            const validEmail = 'sk@shubham.gov.in'; // Static valid credentials
-            const validPassword = 'securepassword';
-
-            // Check against statically defined credentials
-            let loggedIn = false;
-            if (email === validEmail && password === validPassword) {
-                loggedIn = true;
-            } else {
-                // Check against dynamically registered accounts
-                const foundAccount = registeredAccounts.find(acc =>
-                    acc.email.toLowerCase() === email.toLowerCase() &&
-                    acc.password === password
-                );
-                if (foundAccount) {
-                    loggedIn = true;
-                }
-            }
-
-
             setTimeout(() => { // Simulate network request delay
-                if (loggedIn) {
-                    messageDiv.classList.add('success');
-                    messageDiv.textContent = 'Login successful! Redirecting...';
-                    messageDiv.style.display = 'block';
+                const foundAccount = registeredAccounts.find(acc =>
+                    acc.email.toLowerCase() === email.toLowerCase()
+                );
 
-                    setTimeout(() => {
-                        window.location.href = 'https://sites.google.com/view/subham7';
-                    }, 1500);
-
+                if (foundAccount) {
+                    if (foundAccount.type === 'standard') {
+                        if (foundAccount.password === password) {
+                            messageDiv.classList.add('success');
+                            messageDiv.textContent = 'Login successful! Redirecting...';
+                            messageDiv.style.display = 'block';
+                            setTimeout(() => {
+                                window.location.href = 'https://sites.google.com/view/subham7';
+                            }, 1500);
+                        } else {
+                            messageDiv.classList.add('error');
+                            messageDiv.textContent = 'Invalid password. Please try again.';
+                            messageDiv.style.display = 'block';
+                        }
+                    } else if (foundAccount.type === 'oauth') {
+                        messageDiv.classList.add('error');
+                        messageDiv.innerHTML = `This account is registered with **${foundAccount.provider}**. Please use the **Login with ${foundAccount.provider}** button.`;
+                        messageDiv.style.display = 'block';
+                    }
                 } else {
                     messageDiv.classList.add('error');
-                    messageDiv.textContent = 'Invalid email or password. Please try again.';
+                    messageDiv.textContent = 'No account found with this email. Please check your email or create a new account.';
                     messageDiv.style.display = 'block';
-                    showLoading(loginSubmitBtn, false);
                 }
-            }, 1000); // 1 second delay for simulated login
+                showLoading(loginSubmitBtn, false);
+            }, 1000);
         });
 
         // --- Registration Popup Logic (Initial Form) ---
@@ -1337,25 +1350,29 @@
         const closeRegistrationPopup = document.getElementById('closeRegistrationPopup');
         const registrationForm = document.getElementById('registrationForm');
         const regSubmitBtn = document.getElementById('regSubmitBtn');
+        const termsAcceptedCheckbox = document.getElementById('termsAccepted');
 
         let tempRegDetails = {}; // Temporarily store details from first registration step
 
         createAccountLink.addEventListener('click', function(event) {
             event.preventDefault();
-            closeAllPopups(); // Close any other open popups
+            closeAllPopups();
             registrationOverlay.classList.add('active');
-            registrationForm.reset(); // Reset form when opened
+            registrationForm.reset();
+            termsAcceptedCheckbox.checked = false;
         });
 
         closeRegistrationPopup.addEventListener('click', function() {
             registrationOverlay.classList.remove('active');
             registrationForm.reset();
+            termsAcceptedCheckbox.checked = false;
         });
 
         registrationOverlay.addEventListener('click', function(event) {
             if (event.target === registrationOverlay) {
                 registrationOverlay.classList.remove('active');
                 registrationForm.reset();
+                termsAcceptedCheckbox.checked = false;
             }
         });
 
@@ -1368,7 +1385,7 @@
             const email = document.getElementById('regEmail').value.trim();
             const aadhar = document.getElementById('regAadhar').value.trim();
             const pan = document.getElementById('regPan').value.trim();
-            const termsAccepted = document.getElementById('termsAccepted').checked;
+            const termsAccepted = termsAcceptedCheckbox.checked;
 
             let isValid = true;
             let errorMessage = '';
@@ -1385,7 +1402,6 @@
                 isValid = false;
                 errorMessage += '• Invalid Email Address format.\n';
             }
-             // Check if email already exists in registered accounts
             const isEmailTaken = registeredAccounts.some(acc => acc.email.toLowerCase() === email.toLowerCase());
             if (isEmailTaken) {
                 isValid = false;
@@ -1396,7 +1412,7 @@
                 isValid = false;
                 errorMessage += '• Aadhar Number must be 12 digits.\n';
             }
-            if (!(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/i.test(pan) || /^\d{12}$/.test(pan))) { // Allow 12 digits for PAN as well
+            if (!(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/i.test(pan) || /^\d{12}$/.test(pan))) {
                 isValid = false;
                 errorMessage += '• PAN Card Number must be 10 alphanumeric (e.g., ABCDE1234F) or 12 digits.\n';
             }
@@ -1406,11 +1422,11 @@
             }
 
 
-            setTimeout(() => { // Simulate network request delay
+            setTimeout(() => {
                 if (isValid) {
-                    tempRegDetails = { name, phone, email, aadhar, pan }; // Store initial details
-                    registrationOverlay.classList.remove('active'); // Close first popup
-                    startRegCountryPasswordFlow(); // Open new multi-step popup
+                    tempRegDetails = { name, phone, email, aadhar, pan };
+                    registrationOverlay.classList.remove('active');
+                    startRegCountryPasswordFlow();
                 } else {
                     alert('Registration Error:\n' + errorMessage);
                 }
@@ -1451,28 +1467,26 @@
             registrationCountryPasswordOverlay.classList.add('active');
             regPopupTitle.textContent = 'Complete Your Registration';
 
-            // Reset inputs and errors for this popup
             regPopupCountry.value = '';
             regPopupPassword.value = '';
             regPopupCountryError.style.display = 'none';
             regPopupPasswordError.style.display = 'none';
 
-            showRegPopupStep(regPopupCountryStep); // Start with country selection
-            showLoading(regPopupCountryNextBtn, false); // Ensure button is not loading
-            showLoading(regPopupCompleteBtn, false); // Ensure button is not loading
+            showRegPopupStep(regPopupCountryStep);
+            showLoading(regPopupCountryNextBtn, false);
+            showLoading(regPopupCompleteBtn, false);
             regPopupCountry.focus();
         }
 
         closeRegCountryPasswordPopup.addEventListener('click', function() {
             registrationCountryPasswordOverlay.classList.remove('active');
-            // Clear temp data if user abandons mid-way
             tempRegDetails = {};
         });
 
         registrationCountryPasswordOverlay.addEventListener('click', function(event) {
             if (event.target === registrationCountryPasswordOverlay) {
                 registrationCountryPasswordOverlay.classList.remove('active');
-                tempRegDetails = {}; // Clear temp data if user abandons mid-way
+                tempRegDetails = {};
             }
         });
 
@@ -1489,7 +1503,7 @@
 
             setTimeout(() => {
                 if (isValid) {
-                    tempRegDetails.country = country; // Add country to temp data
+                    tempRegDetails.country = country;
                     regPopupCountryError.style.display = 'none';
                     showRegPopupStep(regPopupPasswordStep);
                     regPopupPassword.focus();
@@ -1514,10 +1528,10 @@
 
             setTimeout(() => {
                 if (isValid) {
-                    tempRegDetails.password = password; // Add password to temp data
+                    tempRegDetails.password = password;
                     tempRegDetails.type = 'standard'; // Mark as standard registration
 
-                    registeredAccounts.push(tempRegDetails); // Add to our global registered accounts array
+                    registeredAccounts.push(tempRegDetails);
                     console.log('New Standard Account Registered:', tempRegDetails);
                     console.log('All Registered Accounts:', registeredAccounts);
 
@@ -1535,10 +1549,9 @@
             showLoading(goToLoginFromRegPopup, true);
             setTimeout(() => {
                 registrationCountryPasswordOverlay.classList.remove('active');
-                // Pre-fill login form with newly created credentials
-                document.getElementById('email').value = tempRegDetails.email;
-                document.getElementById('password').value = tempRegDetails.password;
-                tempRegDetails = {}; // Clear temp data after use
+                document.getElementById('email').value = '';
+                document.getElementById('password').value = '';
+                tempRegDetails = {};
                 showLoading(goToLoginFromRegPopup, false);
             }, 500);
         });
@@ -1580,10 +1593,9 @@
 
         forgotPasswordLink.addEventListener('click', function(event) {
             event.preventDefault();
-            closeAllPopups(); // Close any other open popups
+            closeAllPopups();
             forgotPasswordOverlay.classList.add('active');
 
-            // Reset forgot password state
             forgotPasswordIntro.style.display = 'block';
             questionForm.style.display = 'none';
             currentQuestion = 0;
@@ -1619,7 +1631,7 @@
 
         startQuestionsBtn.addEventListener('click', function() {
             showLoading(startQuestionsBtn, true);
-            setTimeout(() => { // Simulate a small delay before starting questions
+            setTimeout(() => {
                 forgotPasswordIntro.style.display = 'none';
                 questionForm.style.display = 'block';
                 startQuestion();
@@ -1646,10 +1658,17 @@
                 }, 1000);
                 showLoading(submitAnswerBtn, false);
             } else {
-                forgotPasswordOverlay.classList.remove('active');
-                credentialsOverlay.classList.add('active');
-                displayEmail.textContent = 'sk@shubham.gov.in'; // Static credentials for success
-                displayPassword.textContent = 'securepassword';
+                // If all questions answered, fetch credentials for the static account
+                const staticAccount = registeredAccounts.find(acc => acc.email === 'sk@shubham.gov.in' && acc.type === 'standard');
+                if (staticAccount) {
+                    forgotPasswordOverlay.classList.remove('active');
+                    credentialsOverlay.classList.add('active');
+                    displayEmail.textContent = staticAccount.email;
+                    displayPassword.textContent = staticAccount.password;
+                } else {
+                    alert('Error: Static account not found for credentials display.');
+                    resetForgotPasswordFlow();
+                }
             }
         }
 
@@ -1661,16 +1680,23 @@
             const userAnswer = answerInput.value.trim().toLowerCase();
             const correctAnswer = questions[currentQuestion].answer.toLowerCase();
 
-            setTimeout(() => { // Simulate validation delay
+            setTimeout(() => {
                 if (userAnswer === correctAnswer) {
                     currentQuestion++;
                     if (currentQuestion < questions.length) {
                         startQuestion();
                     } else {
-                        forgotPasswordOverlay.classList.remove('active');
-                        credentialsOverlay.classList.add('active');
-                        displayEmail.textContent = 'sk@shubham.gov.in';
-                        displayPassword.textContent = 'securepassword';
+                        // All questions answered, fetch credentials for the static account
+                        const staticAccount = registeredAccounts.find(acc => acc.email === 'sk@shubham.gov.in' && acc.type === 'standard');
+                        if (staticAccount) {
+                            forgotPasswordOverlay.classList.remove('active');
+                            credentialsOverlay.classList.add('active');
+                            displayEmail.textContent = staticAccount.email;
+                            displayPassword.textContent = staticAccount.password;
+                        } else {
+                            alert('Error: Static account not found for credentials display.');
+                            resetForgotPasswordFlow();
+                        }
                     }
                 } else {
                     alert('Incorrect answer. Please retry.');
@@ -1720,8 +1746,11 @@
         goToLoginWithCredentials.addEventListener('click', function() {
             showLoading(goToLoginWithCredentials, true);
             setTimeout(() => {
-                document.getElementById('email').value = 'sk@shubham.gov.in';
-                document.getElementById('password').value = 'securepassword';
+                const staticAccount = registeredAccounts.find(acc => acc.email === 'sk@shubham.gov.in' && acc.type === 'standard');
+                if (staticAccount) {
+                    document.getElementById('email').value = staticAccount.email;
+                    document.getElementById('password').value = staticAccount.password;
+                }
                 credentialsOverlay.classList.remove('active');
                 showLoading(goToLoginWithCredentials, false);
             }, 500);
@@ -1732,17 +1761,17 @@
         const closeTermsAndConditionsPopup = document.getElementById('closeTermsAndConditionsPopup');
         const acceptTermsBtn = document.getElementById('acceptTermsBtn');
 
-        // Function to open T&C popup
-        function openTermsAndConditions() {
-            closeAllPopups(); // Close any other open popups
+        function openTermsAndConditions(checkboxId) {
+            closeAllPopups();
+            acceptTermsBtn.setAttribute('data-checkbox-id', checkboxId);
             termsAndConditionsOverlay.classList.add('active');
         }
 
-        // Attach event listener to all elements with class 'viewTermsLink'
         document.querySelectorAll('.viewTermsLink').forEach(link => {
             link.addEventListener('click', function(event) {
                 event.preventDefault();
-                openTermsAndConditions();
+                const checkboxId = this.getAttribute('data-target-checkbox');
+                openTermsAndConditions(checkboxId);
             });
         });
 
@@ -1758,7 +1787,15 @@
 
         acceptTermsBtn.addEventListener('click', function() {
             termsAndConditionsOverlay.classList.remove('active');
+            const checkboxToTickId = this.getAttribute('data-checkbox-id');
+            if (checkboxToTickId) {
+                const checkbox = document.getElementById(checkboxToTickId);
+                if (checkbox) {
+                    checkbox.checked = true;
+                }
+            }
         });
+
 
         // --- Simulated OAuth Popup Logic (Multi-step) ---
         const googleAuthBtn = document.getElementById('googleAuthBtn');
@@ -1773,14 +1810,13 @@
         const closeSimulatedOAuthPopup = document.getElementById('closeSimulatedOAuthPopup');
         const oauthPopupTitle = document.getElementById('oauthPopupTitle');
 
-        // Step elements
         const oauthLoadingStep = document.getElementById('oauthLoadingStep');
         const loadingProviderName = document.getElementById('loadingProviderName');
 
-        const oauthLoginEmailStep = document.getElementById('oauthLoginEmailStep'); // Renamed for clarity (login only)
+        const oauthLoginEmailStep = document.getElementById('oauthLoginEmailStep');
         const loginEmailStepPrompt = document.getElementById('loginEmailStepPrompt');
         const oauthLoginEmailInput = document.getElementById('oauthLoginEmailInput');
-        const oauthLoginTermsAccepted = document.getElementById('oauthLoginTermsAccepted'); // New T&C checkbox for OAuth login
+        const oauthLoginTermsAccepted = document.getElementById('oauthLoginTermsAccepted');
         const oauthLoginEmailError = document.getElementById('oauthLoginEmailError');
         const oauthLoginEmailNextBtn = document.getElementById('oauthLoginEmailNextBtn');
 
@@ -1790,7 +1826,6 @@
         const oauthPasswordError = document.getElementById('oauthPasswordError');
         const oauthPasswordNextBtn = document.getElementById('oauthPasswordNextBtn');
 
-        // New signup steps
         const oauthSignupStep1 = document.getElementById('oauthSignupStep1');
         const signupProviderName1 = document.getElementById('signupProviderName1');
         const oauthSignupName = document.getElementById('oauthSignupName');
@@ -1803,7 +1838,7 @@
         const signupProviderName2 = document.getElementById('signupProviderName2');
         const oauthSignupEmail = document.getElementById('oauthSignupEmail');
         const oauthSignupPassword = document.getElementById('oauthSignupPassword');
-        const oauthSignupTermsAccepted = document.getElementById('oauthSignupTermsAccepted'); // New T&C checkbox for OAuth signup
+        const oauthSignupTermsAccepted = document.getElementById('oauthSignupTermsAccepted');
         const oauthSignupStep2Error = document.getElementById('oauthSignupStep2Error');
         const oauthSignupCompleteBtn = document.getElementById('oauthSignupCompleteBtn');
         const oauthSignupSuccessStep = document.getElementById('oauthSignupSuccessStep');
@@ -1816,10 +1851,10 @@
         const oauthRobotMessage = document.getElementById('oauthRobotMessage');
 
         let currentOAuthProvider = '';
-        let currentOAuthType = ''; // 'login' or 'signup'
+        let currentOAuthFlowType = ''; // 'login' or 'signup'
         let tempOAuthAccountDetails = {}; // To store details during OAuth signup
 
-        // Function to show a specific step in the OAuth popup
+
         function showOAuthStep(stepElement) {
             document.querySelectorAll('#simulatedOAuthPopup .step-content').forEach(step => {
                 step.classList.remove('active');
@@ -1827,51 +1862,47 @@
             stepElement.classList.add('active');
         }
 
-        // Function to start the multi-step OAuth flow
-        function startOAuthFlow(provider, type) {
-            closeAllPopups(); // Close any other open popups
+        function startOAuthFlow(provider, flowType) { // flowType can be 'login' or 'signup'
+            closeAllPopups();
             simulatedOAuthOverlay.classList.add('active');
 
             currentOAuthProvider = provider;
-            currentOAuthType = type;
+            currentOAuthFlowType = flowType; // Store the flow type
 
-            oauthPopupTitle.textContent = `${provider} ${type === 'login' ? 'Login' : 'Signup'}`;
+            oauthPopupTitle.textContent = `${provider} ${flowType === 'login' ? 'Login' : 'Signup'}`;
             loadingProviderName.textContent = provider;
-            showOAuthStep(oauthLoadingStep); // Start with loading screen
+            showOAuthStep(oauthLoadingStep);
 
-            // Clear previous input/errors/messages
             oauthLoginEmailInput.value = '';
             oauthPasswordInput.value = '';
             oauthLoginEmailError.style.display = 'none';
             oauthPasswordError.style.display = 'none';
             oauthRobotMessage.style.display = 'none';
-            oauthSignupStep1Error.style.display = 'none'; // Clear new signup errors
-            oauthSignupStep2Error.style.display = 'none'; // Clear new signup errors
+            oauthSignupStep1Error.style.display = 'none';
+            oauthSignupStep2Error.style.display = 'none';
 
-            // Reset T&C checkboxes
             oauthLoginTermsAccepted.checked = false;
             oauthSignupTermsAccepted.checked = false;
 
-            // Reset signup form fields
             oauthSignupName.value = '';
-            oauthSignupCountry.value = ''; // Reset select to default
+            oauthSignupCountry.value = '';
             oauthSignupMobile.value = '';
             oauthSignupEmail.value = '';
             oauthSignupPassword.value = '';
-
+            tempOAuthAccountDetails = {}; // Clear previous temp data
 
             setTimeout(() => {
-                if (currentOAuthType === 'login') {
-                    // For login, go directly to email/ID step
+                if (currentOAuthFlowType === 'login') {
+                    // For OAuth login, we first prompt for email/ID
                     loginEmailStepPrompt.innerHTML = `Enter your ${provider === 'Google' ? 'Gmail ID' : provider === 'Microsoft' ? 'Outlook Email ID' : 'Apple ID'} for **${provider}**:<br><small>If you have not signed up, you will be prompted to do so.</small>`;
                     showOAuthStep(oauthLoginEmailStep);
                     oauthLoginEmailInput.focus();
-                } else { // Signup flow
+                } else { // 'signup' flow
                     signupProviderName1.textContent = provider;
                     showOAuthStep(oauthSignupStep1);
                     oauthSignupName.focus();
                 }
-            }, 1500); // Simulate loading time
+            }, 1500);
         }
 
         // Login Email/ID Next Button Click Handler
@@ -1887,6 +1918,7 @@
             } else if (emailOrId === '') {
                 errorMessage = 'Please enter your Email/ID.';
             } else {
+                // Provider-specific email validation
                 if (currentOAuthProvider === 'Google') {
                     if (/@gmail\.com$/i.test(emailOrId)) {
                         isValid = true;
@@ -1900,7 +1932,7 @@
                         errorMessage = 'Invalid Outlook Email ID format (must end with @outlook.com).';
                     }
                 } else if (currentOAuthProvider === 'Apple') {
-                    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailOrId)) { // Generic email validation for Apple for now
+                    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailOrId)) {
                         isValid = true;
                     } else {
                         errorMessage = 'Invalid Apple ID format.';
@@ -1909,22 +1941,23 @@
             }
 
 
-            setTimeout(() => { // Simulate validation delay
+            setTimeout(() => {
                 if (isValid) {
-                    // Check if this account exists in our simulated registered accounts
                     const foundAccount = registeredAccounts.find(acc =>
                         acc.email.toLowerCase() === emailOrId.toLowerCase() &&
-                        acc.provider === currentOAuthProvider &&
-                        acc.type === 'OAuth'
+                        acc.type === 'oauth' && // Ensure it's an OAuth account
+                        acc.provider === currentOAuthProvider // Ensure it's for the correct provider
                     );
 
                     if (foundAccount) {
-                        passwordProviderName.textContent = currentOAuthProvider; // Set provider name for password step
-                        oauthLoginEmailError.style.display = 'none'; // Hide any previous error
+                        // Account found, proceed to password step for LOGIN
+                        passwordProviderName.textContent = currentOAuthProvider;
+                        oauthLoginEmailError.style.display = 'none';
                         showOAuthStep(oauthPasswordStep);
                         oauthPasswordInput.focus();
                     } else {
-                        oauthLoginEmailError.textContent = `No ${currentOAuthProvider} account found with this email ID. Please signup first.`;
+                        // Account not found for this provider, prompt for signup
+                        oauthLoginEmailError.textContent = `No ${currentOAuthProvider} account found with this email ID. Please sign up first using the "Sign up with ${currentOAuthProvider}" option.`;
                         oauthLoginEmailError.style.display = 'block';
                     }
                 } else {
@@ -1935,7 +1968,7 @@
             }, 700);
         });
 
-        // Password Next Button Click Handler (used for login flow)
+        // Password Next Button Click Handler (used for OAuth login flow)
         oauthPasswordNextBtn.addEventListener('click', function() {
             showLoading(oauthPasswordNextBtn, true);
             const password = oauthPasswordInput.value.trim();
@@ -1948,23 +1981,23 @@
                 errorMessage = 'Password must be at least 8 characters long.';
             }
 
-            setTimeout(() => { // Simulate validation delay
+            setTimeout(() => {
                 if (isValid) {
                     const enteredEmail = oauthLoginEmailInput.value.trim();
                     const foundAccount = registeredAccounts.find(acc =>
                         acc.email.toLowerCase() === enteredEmail.toLowerCase() &&
                         acc.password === password &&
-                        acc.provider === currentOAuthProvider &&
-                        acc.type === 'OAuth'
+                        acc.type === 'oauth' && // Crucial: ensure it's an OAuth account
+                        acc.provider === currentOAuthProvider // Crucial: ensure provider matches
                     );
 
                     if (foundAccount) {
                         oauthPasswordError.style.display = 'none';
-                        showOAuthStep(oauthRobotStep); // Proceed to robot check
+                        showOAuthStep(oauthRobotStep); // Proceed to robot check for successful OAuth login
                     } else {
-                        oauthPasswordError.textContent = 'Invalid password for this account.';
+                        oauthPasswordError.textContent = 'Invalid password or account not found for this provider.';
                         oauthPasswordError.style.display = 'block';
-                        showLoading(oauthPasswordNextBtn, false); // Keep button enabled for retry
+                        showLoading(oauthPasswordNextBtn, false);
                     }
                 } else {
                     oauthPasswordError.textContent = errorMessage;
@@ -1974,7 +2007,7 @@
             }, 700);
         });
 
-        // Signup Step 1 Next Button Handler
+        // Signup Step 1 Next Button Handler (for OAuth signup)
         oauthSignupStep1NextBtn.addEventListener('click', function() {
             showLoading(oauthSignupStep1NextBtn, true);
             const name = oauthSignupName.value.trim();
@@ -2000,14 +2033,14 @@
             setTimeout(() => {
                 if (isValid) {
                     oauthSignupStep1Error.style.display = 'none';
-                    tempOAuthAccountDetails = { // Store details for the next step
+                    tempOAuthAccountDetails = {
                         name: name,
                         country: country,
                         mobile: mobile,
                         provider: currentOAuthProvider,
-                        type: 'OAuth'
+                        type: 'oauth' // Ensure type is 'oauth' for this flow
                     };
-                    signupProviderName2.textContent = currentOAuthProvider; // Set provider name for next step
+                    signupProviderName2.textContent = currentOAuthProvider;
                     showOAuthStep(oauthSignupStep2);
                     oauthSignupEmail.focus();
                 } else {
@@ -2018,7 +2051,7 @@
             }, 700);
         });
 
-        // Signup Step 2 Complete Signup Button Handler
+        // Signup Step 2 Complete Signup Button Handler (for OAuth signup)
         oauthSignupCompleteBtn.addEventListener('click', function() {
             showLoading(oauthSignupCompleteBtn, true);
             const email = oauthSignupEmail.value.trim();
@@ -2039,16 +2072,16 @@
                 } else if (currentOAuthProvider === 'Microsoft' && !/@outlook\.com$/i.test(email)) {
                     isValid = false;
                     errorMessage += '• Microsoft signup requires a @outlook.com email.\n';
-                } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { // Generic email validation
+                } else if (currentOAuthProvider === 'Apple' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
                     isValid = false;
-                    errorMessage += '• Invalid Email ID format.\n';
+                    errorMessage += '• Invalid Apple ID email format.\n';
                 }
 
-                // Check if email is already registered for this provider
+                // Check if email is already registered with ANY type or specific provider
                 const isEmailTaken = registeredAccounts.some(acc =>
                     acc.email.toLowerCase() === email.toLowerCase() &&
-                    acc.provider === currentOAuthProvider &&
-                    acc.type === 'OAuth'
+                    // For OAuth signup, ensure the combination of email AND provider is unique
+                    (acc.type === 'standard' || (acc.type === 'oauth' && acc.provider === currentOAuthProvider))
                 );
                 if (isEmailTaken) {
                     isValid = false;
@@ -2066,15 +2099,15 @@
                 if (isValid) {
                     oauthSignupStep2Error.style.display = 'none';
 
-                    // Store the new account, combining temp details and new email/password
                     tempOAuthAccountDetails.email = email;
-                    tempOAuthAccountDetails.password = password;
+                    tempOAuthAccountDetails.password = password; // This password is for our simulated OAuth login
+                    // 'type' and 'provider' are already set in tempOAuthAccountDetails from startOAuthFlow and signupStep1
+
                     registeredAccounts.push(tempOAuthAccountDetails);
 
                     console.log('New OAuth Account Registered:', tempOAuthAccountDetails);
                     console.log('All Registered Accounts:', registeredAccounts);
 
-                    // Show success message and offer to go to login
                     showOAuthStep(oauthSignupSuccessStep);
                 } else {
                     oauthSignupStep2Error.textContent = errorMessage;
@@ -2084,55 +2117,57 @@
             }, 1000);
         });
 
-        // Go to Login from OAuth Signup Success
         goToLoginFromOAuthSignup.addEventListener('click', function() {
             showLoading(goToLoginFromOAuthSignup, true);
             setTimeout(() => {
                 simulatedOAuthOverlay.classList.remove('active');
-                // Optionally pre-fill login form with new credentials
-                document.getElementById('email').value = tempOAuthAccountDetails.email;
-                document.getElementById('password').value = tempOAuthAccountDetails.password;
-                tempOAuthAccountDetails = {}; // Clear temp data after use
+                // Don't pre-fill email/password in main login form as it's an OAuth account
+                document.getElementById('email').value = '';
+                document.getElementById('password').value = '';
+                tempOAuthAccountDetails = {}; // Clear temp data
                 showLoading(goToLoginFromOAuthSignup, false);
             }, 500);
         });
 
-
         // Robot Check Buttons Click Handler
         function handleRobotCheck(isHuman) {
-            // Disable buttons to prevent multiple clicks
             showLoading(oauthRobotYesBtn, true);
             showLoading(oauthRobotNoBtn, true);
-            oauthRobotMessage.style.display = 'none'; // Hide previous message
+            oauthRobotMessage.style.display = 'none';
 
             if (isHuman) {
-                // If "Yes" is clicked (implies human), proceed to success and redirect
                 setTimeout(() => {
                     alert(`Successfully logged in with ${currentOAuthProvider}! Redirecting...`);
                     window.location.href = 'https://sites.google.com/view/subham7';
-                }, 1000); // Short delay before redirect
+                }, 1000);
             } else {
-                // If "No" is clicked (implies not human/robot)
                 oauthRobotMessage.textContent = 'Humans are not allowed.';
-                oauthRobotMessage.classList.remove('success'); // Ensure it's not green
+                oauthRobotMessage.classList.remove('success');
                 oauthRobotMessage.classList.add('error');
                 oauthRobotMessage.style.display = 'block';
 
                 setTimeout(() => {
-                    // Redirect back to email/ID and password entry after 4 seconds
-                    // We go back to the email step, clearing the password input
+                    // Reset to the start of the OAuth login flow (email input)
                     oauthLoginEmailInput.value = '';
                     oauthPasswordInput.value = '';
                     oauthPasswordError.style.display = 'none';
-                    oauthRobotMessage.style.display = 'none'; // Hide message before redirecting step
+                    oauthRobotMessage.style.display = 'none';
 
-                    showOAuthStep(oauthLoginEmailStep); // Go back to login email step
-                    oauthLoginEmailInput.focus();
+                    // Ensure we go back to the login email step, not signup
+                    if (currentOAuthFlowType === 'login') {
+                         loginEmailStepPrompt.innerHTML = `Enter your ${currentOAuthProvider === 'Google' ? 'Gmail ID' : currentOAuthProvider === 'Microsoft' ? 'Outlook Email ID' : 'Apple ID'} for **${currentOAuthProvider}**:<br><small>If you have not signed up, you will be prompted to do so.</small>`;
+                        showOAuthStep(oauthLoginEmailStep);
+                        oauthLoginEmailInput.focus();
+                    } else {
+                        // If somehow in signup flow and hit robot check, reset to signup step 1
+                        signupProviderName1.textContent = currentOAuthProvider;
+                        showOAuthStep(oauthSignupStep1);
+                        oauthSignupName.focus();
+                    }
 
-                    // Re-enable buttons
                     showLoading(oauthRobotYesBtn, false);
                     showLoading(oauthRobotNoBtn, false);
-                }, 4000); // 4 seconds delay as requested
+                }, 4000);
             }
         }
 
@@ -2142,7 +2177,7 @@
         // Close button for simulated OAuth popup
         closeSimulatedOAuthPopup.addEventListener('click', function() {
             simulatedOAuthOverlay.classList.remove('active');
-            // Reset to initial state for next open
+            // Reset state for next open
             showOAuthStep(oauthLoadingStep);
             oauthLoginEmailInput.value = '';
             oauthPasswordInput.value = '';
@@ -2152,14 +2187,12 @@
             oauthSignupStep1Error.style.display = 'none';
             oauthSignupStep2Error.style.display = 'none';
 
-            // Reset signup form fields
             oauthSignupName.value = '';
             oauthSignupCountry.value = '';
             oauthSignupMobile.value = '';
             oauthSignupEmail.value = '';
             oauthSignupPassword.value = '';
 
-            // Reset T&C checkboxes
             oauthLoginTermsAccepted.checked = false;
             oauthSignupTermsAccepted.checked = false;
 
@@ -2170,13 +2203,14 @@
             showLoading(oauthRobotYesBtn, false);
             showLoading(oauthRobotNoBtn, false);
             showLoading(goToLoginFromOAuthSignup, false);
+            tempOAuthAccountDetails = {}; // Clear temp data on close
         });
 
         // Click outside to close simulated OAuth popup
         simulatedOAuthOverlay.addEventListener('click', function(event) {
             if (event.target === simulatedOAuthOverlay) {
                 simulatedOAuthOverlay.classList.remove('active');
-                // Reset to initial state for next open
+                // Reset state for next open
                 showOAuthStep(oauthLoadingStep);
                 oauthLoginEmailInput.value = '';
                 oauthPasswordInput.value = '';
@@ -2186,14 +2220,12 @@
                 oauthSignupStep1Error.style.display = 'none';
                 oauthSignupStep2Error.style.display = 'none';
 
-                // Reset signup form fields
                 oauthSignupName.value = '';
                 oauthSignupCountry.value = '';
                 oauthSignupMobile.value = '';
                 oauthSignupEmail.value = '';
                 oauthSignupPassword.value = '';
 
-                // Reset T&C checkboxes
                 oauthLoginTermsAccepted.checked = false;
                 oauthSignupTermsAccepted.checked = false;
 
@@ -2204,6 +2236,7 @@
                 showLoading(oauthRobotYesBtn, false);
                 showLoading(oauthRobotNoBtn, false);
                 showLoading(goToLoginFromOAuthSignup, false);
+                tempOAuthAccountDetails = {}; // Clear temp data on close
             }
         });
 
